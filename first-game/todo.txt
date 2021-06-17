@@ -1,0 +1,20 @@
+1. Make Store
+2. Make coins add up to total after each level
+3. Make buyable player colors
+4. Make sure to add main variables
+5. Back button is a must
+6. Store background
+7. Check if player has enough coins to buy items
+8. Apply player bought items
+9. Player skins are different colors
+10. Make sure that one of the skins is not lime green
+11. Make the colors bought by the player transfer over to lvlGen.py script, so it applies the colors
+12. Check for inputs corresponding to items shown. e.g. (1st item requres player to hit 1 to buy, etc.)
+13. Subtracting coins used from total
+14. SFX
+15. Debug at end
+__________________________
+|                        |   
+|   MAKE DATA SAVE!!!    |
+|                        |
+|________________________|

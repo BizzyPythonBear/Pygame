@@ -4,21 +4,36 @@ import sys
 import random
 from time import sleep
 import nextLvl as IDIOT
+from died import *
+import store
+import thanks
 pygame.init()
-
+levelsCompleted = 0
+totalCoins = 0
+numcollected = 0
+ran = False
+green = (0,255,0)
+blue = (0,0,255)
+maroon = (94, 8, 8)
+teal = (0, 255, 242)
+rgb = store.rgb
+playerColor = green
 
 def levelGen():
+    global levelsCompleted
+    global totalCoins
+    global ran
+    global numcollected
+    global playerColor
     WINDOW_WIDTH = 800
     WINDOW_HEIGHT = 600
     randbackground = random.choice(
-        ['c:\\Users\\bizze\\Documents\\Python\\Misc\\Pygame\\first-game\\images\\background.png', 'c:\\Users\\bizze\\Documents\\Python\\Misc\\Pygame\\first-game\\images\\level2bckgrn.png', 'c:\\Users\\bizze\\Documents\\Python\\Misc\\Pygame\\first-game\\images\\level3bckgrnd.png'])
+        ['background.png', 'level2bckgrn.png', 'level3bckgrnd.png'])
     background = pygame.image.load(randbackground)
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("test")
-    coinSFX = pygame.mixer.Sound(
-        "c:\\Users\\bizze\\Documents\\Python\\Misc\\Pygame\\first-game\\sfx\\coinPick.wav")
-    oneUP = pygame.mixer.Sound(
-        "c:\\Users\\bizze\\Documents\\Python\\Misc\\Pygame\\first-game\\sfx\\1UP.wav")
+    coinSFX = pygame.mixer.Sound("coinPick.wav")
+    oneUP = pygame.mixer.Sound("1UP.wav")
     spikeNum = random.randint(0, 20)
     coinNum = random.randint(0, 10)
     powerUpNum = random.randint(0, 2)
@@ -57,7 +72,7 @@ def levelGen():
             self.numcollected = 0
 
         def draw(self):
-            pygame.draw.rect(screen, green, (self.x, self.y, 20, 20))
+            pygame.draw.rect(screen, playerColor, (self.x, self.y, 20, 20))
 
     class ScoreBar:
         def __init__(self, x, width):
@@ -90,12 +105,27 @@ def levelGen():
         def draw(self):
             pygame.draw.circle(screen, blue, (self.x, self.y), 5)
 
+    class levelCounter:
+        def __init__(self, x, width):
+            self.x = x
+            self.width = width
+            self.text = ""
+            self.levelsCompleted = 0
+        def updateCount(self, score):
+            font = pygame.font.SysFont('Arial', 20)
+            self.text = str(score)
+            pygame.draw.rect(screen, green, (self.x, 5, self.width, 12))
+            text = font.render(self.text, 1, (255,255,255))
+            screen.blit(text, (self.x + (self.width / 2 - text.get_width() / 2),
+                               5 + (12 / 2 - text.get_height() / 2)))
+
     player = Player()
     coins = []
     spikes = []
     powerUps = []
     pwrUp = powerUp()
     score = ScoreBar(5, 15)
+    levels = levelCounter(20, 15)
     coin = Coin()
 
     for i in range(coinNum):
@@ -108,7 +138,19 @@ def levelGen():
         p = powerUp()
         powerUps.append(p)
 
+    def addCoinsWhenDead():
+        global totalCoins
+        totalCoins += numcollected
+        ran = False
+        return
+
+    def killPlayer():
+        player.x = 900
+        player.y = 900
+
     def refresh():
+        global totalCoins
+        global ran
         screen.fill((0, 0, 0))
         screen.blit(background, (0, 0))
         player.draw()
@@ -122,11 +164,21 @@ def levelGen():
 
         for spike in spikes:
             if spike.x >= player.x and spike.x <= (player.x+20) and spike.y >= player.y and spike.y <= player.y + 20:
-                screen.fill(black)
-                screen.blit(text, (400, 300))
-                screen.blit(text2, (400, 200))
                 player.velocity = 0
                 restart = True
+                ran = True
+                kill = True
+                while ran:
+                    addCoinsWhenDead()
+                    ran = False
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            running = False
+                            pygame.quit()
+                            sys.exit()
+                            break
+                killPlayer()
+                youDied()
 
         for powerUp in powerUps:
             if powerUp.x >= player.x and powerUp.x <= (player.x+20) and powerUp.y >= player.y and powerUp.y <= player.y + 20:
@@ -143,6 +195,7 @@ def levelGen():
                 return
 
         score.updatescore(player.numcollected)
+        levels.updateCount(levelsCompleted)
         pygame.display.update()
 
     def collectSFX():
@@ -152,16 +205,19 @@ def levelGen():
     def triggerSFX():
         pygame.mixer.Sound.play(oneUP)
         return
-
+          
     while running:
+        global numcollected
         refresh()
         if player.numcollected == 5:
             if oneUPPlayed:
                 oneUPPlayed = False
                 triggerSFX()
         if player.numcollected == 10:
+            levelsCompleted += 1
+            totalCoins += 10
             IDIOT.nextLevel()
-            pygame.display.update()
+            
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -183,6 +239,7 @@ def levelGen():
         for coin in coins:
             if coin.x >= player.x and coin.x <= (player.x+20) and coin.y >= player.y and coin.y <= player.y + 20:
                 player.numcollected += 1
+                numcollected += 1
                 coin.collected = True
                 collectSFX()
                 coin.moveCoinToNewPos()  # Calling new function

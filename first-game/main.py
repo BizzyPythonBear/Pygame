@@ -15,8 +15,7 @@ def mainMenu():
     green = (0, 255, 0)
     blue = (0, 0, 255)
     black = (0, 0, 0)
-    background = pygame.image.load(
-        'c:\\Users\\bizze\\Documents\\Python\\Misc\\Pygame\\first-game\\images\\menuBackground.png')
+    background = pygame.image.load('menuBackground.png')
     font = pygame.font.SysFont('Minecraft', 30)
     text = font.render('Coin Collect Game!', False, red)
     text2 = font.render('Hit SPACE to start!', False, red)
