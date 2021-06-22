@@ -366,7 +366,7 @@ def buyItem1():
     global takeaway1
     global numcollected
     if numcollected >= 20:
-        numcollected -= takeaway1
+        data['numcollected'] -= takeaway1
         data['playerColor'] = blue
         thanks.thanksForPurchase()
     else:
@@ -376,7 +376,7 @@ def buyItem2():
     global takeaway2
     global numcollected
     if numcollected >= 30:
-        numcollected -= takeaway2
+        data['numcollected'] -= takeaway2
         data['playerColor'] = rgb
         thanks.thanksForPurchase()
     else:
@@ -386,7 +386,7 @@ def buyItem3():
     global takeaway3
     global numcollected
     if numcollected >= 40:
-        numcollected -= takeaway3
+        data['numcollected'] -= takeaway3
         data['playerColor'] = maroon
         thanks.thanksForPurchase()
     else:
@@ -396,7 +396,7 @@ def buyItem4():
     global takeaway4
     global numcollected
     if numcollected >= 50:
-        numcollected -= takeaway4
+        data['numcollected'] -= takeaway4
         data['playerColor'] = teal
         thanks.thanksForPurchase()
     else:
