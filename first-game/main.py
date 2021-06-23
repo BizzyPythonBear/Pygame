@@ -38,7 +38,7 @@ def mainMenu():
             if event.type == pygame.QUIT:
                 break
 
-
+print("Hello there!")
 mainMenu()  # Runs main menu on startup so it shows up before the actual game
 
 # Hello there, this is just here so I can get passed the 700th line

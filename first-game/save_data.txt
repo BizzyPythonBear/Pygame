@@ -1,1 +1,1 @@
-{"levelsCompleted": 4, "playerColor": [0, 0, 255], "numcollected": 7, "totalCoins": 84}
+{"levelsCompleted": 12, "playerColor": [94, 8, 8], "numcollected": 1, "totalCoins": 316}

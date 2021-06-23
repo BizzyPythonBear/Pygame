@@ -37,10 +37,13 @@ playerColor = data['playerColor']
 numcollected = data['numcollected']
 totalCoins = data['totalCoins']
 
+enemies = []
+
 def levelGen():
     global green
     global ran
     global totalCoins
+    global enemies
     WINDOW_WIDTH = 800
     WINDOW_HEIGHT = 600
     randbackground = random.choice(
@@ -64,6 +67,7 @@ def levelGen():
     center = (0, 0)
     running = True
     restart = False
+    enemyNum = random.randint(0, 2)
 
     class Coin:
         def __init__(self):
@@ -89,6 +93,9 @@ def levelGen():
 
         def draw(self):
             pygame.draw.rect(screen, data['playerColor'], (self.x, self.y, 20, 20))
+
+        def update(self):
+            self.rect.clamp_ip(screen.get_rect())
 
     class ScoreBar:
         def __init__(self, x, width):
@@ -134,7 +141,49 @@ def levelGen():
             screen.blit(text, (self.x + (self.width / 2 - text.get_width() / 2),
                                5 + (12 / 2 - text.get_height() / 2)))
 
+    class movingEnemy:
+        def __init__(self):
+            xCord = random.randint(100, 700)
+            yCord = random.randint(50, 500)
+            self.x = 0
+            self.y = yCord
+            self.width = 20
+            self.height = 20
+            self.path = [xCord, 800]
+            self.walkCount = 0
+            self.vel = 3
+
+        def draw(self,win):
+            self.move()
+            pygame.draw.rect(screen, red, (self.x, self.y, 20, 20))
+            if self.walkCount + 1 <= 33:
+                self.walkCount = 0
+            
+            if self.vel > 0:
+                self.walkCount += 1
+
+            else:
+                self.walkCount += 1
+
+
+        def move(self):
+                if self.vel > 0:
+                    if self.x < self.path[1] + self.vel:
+                        self.x += self.vel
+                    else:
+                        self.vel = self.vel * -1
+                        self.x += self.vel
+                        self.walkCount = 0
+                else:
+                    if self.x > self.path[0] - self.vel:
+                        self.x += self.vel
+                    else:
+                        self.vel = self.vel * -1
+                        self.x += self.vel
+                        self.walkCount = 0
+
     player = Player()
+    enemy = movingEnemy()
     coins = []
     spikes = []
     powerUps = []
@@ -152,6 +201,9 @@ def levelGen():
     for i in range(powerUpNum):
         p = powerUp()
         powerUps.append(p)
+    for i in range(5):
+        e = movingEnemy()
+        enemies.append(e)
 
     def addCoinsWhenDead():
         data['totalCoins'] += data['numcollected']
@@ -165,10 +217,14 @@ def levelGen():
     youDied
 
     def refresh():
+        global enemy
+        global enemies
         global ran
         screen.fill((0, 0, 0))
         screen.blit(background, (0, 0))
         player.draw()
+        enemy = movingEnemy()
+        #print("Enemy X: " + str(enemy.x) + "Enemy Y: " + str(enemy.y))
         for coin in coins:
             if not coin.collected:
                 coin.draw()
@@ -176,9 +232,29 @@ def levelGen():
             spike.draw()
         for powerUp in powerUps:
             powerUp.draw()
+        for enemy in enemies:
+            enemy.draw(screen)
 
         for spike in spikes:
             if spike.x >= player.x and spike.x <= (player.x+20) and spike.y >= player.y and spike.y <= player.y + 20:
+                player.velocity = 0
+                restart = True
+                ran = True
+                kill = True
+                while ran:
+                    addCoinsWhenDead()
+                    ran = False
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            running = False
+                            pygame.quit()
+                            sys.exit()
+                            break
+                killPlayer()
+                youDied()
+
+        for enemy in enemies:
+            if enemy.x >= player.x and enemy.x <= (player.x+20) and enemy.y >= player.y and enemy.y <= player.y + 20:
                 player.velocity = 0
                 restart = True
                 ran = True
@@ -238,6 +314,7 @@ def levelGen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 with open('save_data.txt','w') as save_data:
+                    print("Data Saved!")
                     json.dump(data,save_data)
 
                 running = False
@@ -245,13 +322,13 @@ def levelGen():
                 sys.exit()
 
         pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_UP]:
+        if pressed[pygame.K_UP] and player.y > 0:
             player.y -= player.velocity
-        if pressed[pygame.K_DOWN]:
+        if pressed[pygame.K_DOWN] and player.y < 600 - 20:
             player.y += player.velocity
-        if pressed[pygame.K_LEFT]:
+        if pressed[pygame.K_LEFT] and player.x > 0:
             player.x -= player.velocity
-        if pressed[pygame.K_RIGHT]:
+        if pressed[pygame.K_RIGHT] and player.x < 800 - 20:
             player.x += player.velocity
 
         for coin in coins:
