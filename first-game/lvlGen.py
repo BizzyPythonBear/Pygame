@@ -15,6 +15,8 @@ maroon = (94, 8, 8)
 teal = (0, 255, 242)
 rgb = random.choice([red, green, blue])
 
+enemyNum = random.randint(0, 5)
+
 takeaway1 = 20
 takeaway2 = 30
 takeaway3 = 40
@@ -37,6 +39,8 @@ playerColor = data['playerColor']
 numcollected = data['numcollected']
 totalCoins = data['totalCoins']
 
+spawnedEnemies = 0
+
 enemies = []
 
 def levelGen():
@@ -44,6 +48,8 @@ def levelGen():
     global ran
     global totalCoins
     global enemies
+    global spawnedEnemies
+
     WINDOW_WIDTH = 800
     WINDOW_HEIGHT = 600
     randbackground = random.choice(
@@ -67,7 +73,6 @@ def levelGen():
     center = (0, 0)
     running = True
     restart = False
-    enemyNum = random.randint(0, 2)
 
     class Coin:
         def __init__(self):
@@ -153,7 +158,7 @@ def levelGen():
             self.walkCount = 0
             self.vel = 3
 
-        def draw(self,win):
+        def draw(self):
             self.move()
             pygame.draw.rect(screen, red, (self.x, self.y, 20, 20))
             if self.walkCount + 1 <= 33:
@@ -201,9 +206,6 @@ def levelGen():
     for i in range(powerUpNum):
         p = powerUp()
         powerUps.append(p)
-    for i in range(5):
-        e = movingEnemy()
-        enemies.append(e)
 
     def addCoinsWhenDead():
         data['totalCoins'] += data['numcollected']
@@ -220,10 +222,10 @@ def levelGen():
         global enemy
         global enemies
         global ran
+        global spawnedEnemies
         screen.fill((0, 0, 0))
         screen.blit(background, (0, 0))
-        player.draw()
-        enemy = movingEnemy()
+        player.draw()                
         #print("Enemy X: " + str(enemy.x) + "Enemy Y: " + str(enemy.y))
         for coin in coins:
             if not coin.collected:
@@ -233,7 +235,7 @@ def levelGen():
         for powerUp in powerUps:
             powerUp.draw()
         for enemy in enemies:
-            enemy.draw(screen)
+            enemy.draw()
 
         for spike in spikes:
             if spike.x >= player.x and spike.x <= (player.x+20) and spike.y >= player.y and spike.y <= player.y + 20:
@@ -301,6 +303,7 @@ def levelGen():
         global levelsCompleted
         global numcollected
         refresh()
+        print(spawnedEnemies)
         if player.numcollected == 5:
             if oneUPPlayed:
                 oneUPPlayed = False
@@ -309,7 +312,6 @@ def levelGen():
             data['levelsCompleted'] += 1
             data['totalCoins'] += 10
             nextLevel()
-            
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -321,6 +323,9 @@ def levelGen():
                 pygame.quit()
                 sys.exit()
 
+        if spawnedEnemies > 5:
+            errorScreen()
+                
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_UP] and player.y > 0:
             player.y -= player.velocity
@@ -367,8 +372,6 @@ def nextLevel():
     text4 = font.render("You now have: " + str(numcollected) + " coins!", False, red)
     center = (0, 0)
     while True:
-        print(levelsCompleted)
-        print(numcollected)
         screen.blit(background, center)
         screen.blit(text3, (400, 300))
         screen.blit(text2, (400, 200))
@@ -504,7 +507,34 @@ def youDied():
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_SPACE]:
             levelGen()
+            
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+                break
 
+def errorScreen():
+    WINDOW_WIDTH = 800
+    WINDOW_HEIGHT = 600
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption("test")
+    red = (255, 0, 0)
+    green = (0, 255, 0)
+    blue = (0, 0, 255)
+    black = (0, 0, 0)
+    font = pygame.font.SysFont('Minecraft', 30)
+    text = font.render('Fatal Error Occured', False, red)
+    text2 = font.render('Enemy num exceeded 5', False, red)
+    text3 = font.render('Please restart the program', False, red)
+    while True:
+        screen.fill(black)
+        screen.blit(text, (400, 300))
+        screen.blit(text2, (400, 200))
+        screen.blit(text3, (400, 400))
+
+        pygame.display.update()
+            
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

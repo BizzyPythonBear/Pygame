@@ -3,7 +3,7 @@ import pygame.freetype
 import sys
 import random
 from time import sleep
-from lvlGen import *
+import lvlGen as LG
 pygame.init()
 
 
@@ -25,7 +25,7 @@ def mainMenu():
         screen.blit(text2, (400, 200))
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_SPACE]:
-            levelGen()
+            LG.lvlGen()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
